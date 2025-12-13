@@ -40,5 +40,16 @@ public class AccessController {
         authService.DeleteCookies(response);
         return ResponseEntity.ok("Successfully Logout");
     }
+     @GetMapping("/auth/profile")
+    public ResponseEntity<UsernameResponse> getProfile(HttpServletRequest request) {
+
+        String userId = request.getHeader("X-USER-ID");
+        String username = request.getHeader("X-USERNAME");
+
+
+        UsernameResponse user = userService. usernameResponse(username);
+
+        return ResponseEntity.ok(user);
+    }
   
 }
