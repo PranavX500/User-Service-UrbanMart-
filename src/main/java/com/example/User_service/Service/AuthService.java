@@ -36,6 +36,7 @@ public class AuthService {
                 )
         );
 
+        // assuming you have a custom UserDetails implementation
         User user = userRepository.findByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -59,9 +60,9 @@ public class AuthService {
         OtpRequest otpRequest=new OtpRequest();
         otpRequest.setEmailId(signupRequest.getEmailId());
         userRepository.save(user);
+
+
         emailProducer.sendEmailId(otpRequest);
-
-
 
 
         return new SignupResponse(user.getId(), user.getUsername());
@@ -70,9 +71,9 @@ public class AuthService {
 
         ResponseCookie cookie = ResponseCookie.from("token", loginResponse.getJwt())
                 .httpOnly(true)
-                .secure(false)     
+                .secure(false)     // ⭐ MUST be false for same-site HTTP
                 .path("/")
-                .sameSite("Lax")  
+                .sameSite("Lax")   // ⭐ MUST be Lax because Chrome marks it same-site
                 .maxAge(604800)
                 .build();;
         System.out.println(cookie);

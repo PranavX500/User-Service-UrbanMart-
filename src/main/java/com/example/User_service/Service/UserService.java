@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 public class UserService {
     @Autowired
     UserRepositery userRepositery;
+
+
+
     public UsernameResponse usernameResponse(String username){
     User user=userRepositery.findByUsername(username).orElseThrow(()->new RuntimeException("User not found"));
     UsernameResponse usernameResponse=new UsernameResponse();

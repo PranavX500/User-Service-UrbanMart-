@@ -2,6 +2,7 @@ package com.example.User_service.Service;
 
 import com.example.User_service.Model.User;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.security.Keys;
@@ -23,8 +24,8 @@ public class AuthUtil {
                 .claim("email", user.getEmailId())
                 .claim("userId",user.getId())// <-- ADD THIS
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 10))
-                .signWith(getSecretKey())
+
+                .signWith(getSecretKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
