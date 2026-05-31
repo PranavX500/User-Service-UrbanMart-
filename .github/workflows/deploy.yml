@@ -1,0 +1,79 @@
+name: Deploy User Service to GKE
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
+  GKE_ZONE: ${{ secrets.GKE_ZONE }}
+
+  IMAGE_NAME: user-service
+  REPOSITORY: urban-mart-microservices-images
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Build Spring Boot Application
+        run: mvn clean package -DskipTests
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker Authentication
+        run: |
+          gcloud auth configure-docker asia-south1-docker.pkg.dev --quiet
+
+      - name: Get GKE Credentials
+        run: |
+          gcloud container clusters get-credentials \
+          $GKE_CLUSTER \
+          --zone $GKE_ZONE \
+          --project $PROJECT_ID
+
+      - name: Build Docker Image
+        run: |
+          docker build \
+          -t asia-south1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }} \
+          -t asia-south1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:latest .
+
+      - name: Push Docker Image
+        run: |
+          docker push asia-south1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }}
+          docker push asia-south1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:latest
+
+      - name: Update Kubernetes Deployment
+        run: |
+          kubectl set image deployment/user-service \
+          user-service=asia-south1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }} \
+          -n urbanmart
+
+      - name: Verify Rollout
+        run: |
+          kubectl rollout status deployment/user-service -n urbanmart
+
+      - name: Show Pods
+        run: |
+          kubectl get pods -n urbanmart
