@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
+
 public class User implements UserDetails {
 
     @Id
@@ -26,14 +27,14 @@ public class User implements UserDetails {
     private String emailId;
     private String phoneNo;
     private boolean verify;
-
-    private String role; // e.g., ROLE_USER or ROLE_ADMIN
+     @Enumerated(EnumType.STRING)
+    private Role role; // e.g., ROLE_USER or ROLE_ADMIN
 
 
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role));
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override
@@ -53,6 +54,10 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
+        return true;
+    }
+
+    public boolean isVerify(boolean b) {
         return true;
     }
 }
