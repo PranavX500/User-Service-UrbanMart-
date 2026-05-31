@@ -7,8 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OtpRequest {
-    private String emailId;
-    private String role;
-
+public class VendorLoginResponse {
+    String jwt;
+    Long id;
 }

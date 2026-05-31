@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -29,6 +30,24 @@ public class AccessController {
         System.out.println(loginResponse);
        return ResponseEntity.ok(loginResponse);
     }
+
+    @PostMapping("/auth/vendor/login")
+    public ResponseEntity<?> vendorloginRequest(@RequestBody VendorLogin loginRequest, HttpServletResponse response){
+        VendorLoginResponse loginResponse=authService.vendorLoginResponse(loginRequest);
+        authService.SetCookiesforvendor(loginResponse,response );
+        System.out.println(loginResponse);
+        return ResponseEntity.ok(loginResponse);
+    }
+    @PostMapping("/auth/vendor/signup")
+    public ResponseEntity<?>VendorsignupRequest(@RequestBody VendorSignupRequest signupRequest) throws IllegalAccessException {
+        VendorSignupResponse signupResponse=authService.vendorSignup(signupRequest);
+
+        return ResponseEntity.ok(signupResponse);
+    }
+
+
+
+
     @PostMapping("/auth/signup")
     public ResponseEntity<?>signupRequest(@RequestBody SignupRequest signupRequest) throws IllegalAccessException {
         SignupResponse signupResponse=authService.signup(signupRequest);
