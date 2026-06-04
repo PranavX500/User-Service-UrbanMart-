@@ -1,7 +1,16 @@
 package com.example.User_service.Model;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,8 +24,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
-
-public class User implements UserDetails {
+public final class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,10 +35,8 @@ public class User implements UserDetails {
     private String emailId;
     private String phoneNo;
     private boolean verify;
-     @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private Role role; // e.g., ROLE_USER or ROLE_ADMIN
-
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -57,7 +63,7 @@ public class User implements UserDetails {
         return true;
     }
 
-    public boolean isVerify(boolean b) {
-        return true;
+    public void setVerify(final boolean verified) {
+        this.verify = verified;
     }
 }

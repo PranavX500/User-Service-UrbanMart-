@@ -1,58 +1,51 @@
 package com.example.User_service.Service;
 
-
 import com.example.User_service.DTO.FlagResponse;
-import com.example.User_service.DTO.SignupResponse;
 import com.example.User_service.Model.User;
 import com.example.User_service.Model.Vendor;
 import com.example.User_service.Repositery.UserRepositery;
 import com.example.User_service.Repositery.VendorRepositery;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
+@RequiredArgsConstructor
 public class EmailConsumer {
+    private final UserRepositery userRepository;
+    private final VendorRepositery vendorRepositery;
 
-    @Autowired
-    private UserRepositery userRepository;
-    @Autowired
-    private VendorRepositery vendorRepositery;
-
-    @KafkaListener(topics = "Otp-Success-topic", groupId = "User-group",properties = {
-            "bootstrap.servers=${spring.kafka.bootstrap-servers}",
-            "key.deserializer=org.apache.kafka.common.serialization.StringDeserializer",
-            "value.deserializer=org.springframework.kafka.support.serializer.JsonDeserializer",
-            "spring.json.value.default.type=com.example.User_service.DTO.FlagResponse",
-            "spring.json.trusted.packages=*"
-    })
-    public void isVerified(FlagResponse flagResponse) {
-
-        System.out.println("Received OTP Response: " + flagResponse);
-
+    @KafkaListener(
+            topics = "Otp-Success-topic",
+            groupId = "User-group",
+            properties = {
+                    "bootstrap.servers=${spring.kafka.bootstrap-servers}",
+                    "key.deserializer=org.apache.kafka.common.serialization."
+                            + "StringDeserializer",
+                    "value.deserializer=org.springframework.kafka.support."
+                            + "serializer.JsonDeserializer",
+                    "spring.json.value.default.type=com.example.User_service."
+                            + "DTO.FlagResponse",
+                    "spring.json.trusted.packages=*"
+            })
+    public void isVerified(final FlagResponse flagResponse) {
         if (flagResponse.isVerified()) {
-            User user = userRepository.findByEmailId(flagResponse.getEmailId());
+            final User user = userRepository.findByEmailId(
+                    flagResponse.getEmailId());
 
             if (user != null) {
                 user.setVerify(true);
                 userRepository.save(user);
-                System.out.println("User saved successfully after OTP verification.");
-            } else {
-                System.out.println("User not found for email: " + flagResponse.getEmailId());
             }
         }
 
         if (flagResponse.isVerified()) {
-            Vendor vendor = vendorRepositery.findByEmailId(flagResponse.getEmailId());
+            final Vendor vendor = vendorRepositery.findByEmailId(
+                    flagResponse.getEmailId());
 
             if (vendor != null) {
                 vendor.setVerify(true);
                 vendorRepositery.save(vendor);
-                System.out.println("User saved successfully after OTP verification.");
-            } else {
-                System.out.println("Vendor not found for email: " + flagResponse.getEmailId());
             }
         }
     }

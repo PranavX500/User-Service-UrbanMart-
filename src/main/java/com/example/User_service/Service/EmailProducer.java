@@ -6,16 +6,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailProducer {
-
     private final KafkaTemplate<String, OtpRequest> kafkaTemplate;
 
-    public EmailProducer(KafkaTemplate<String, OtpRequest> kafkaTemplate) {
-        this.kafkaTemplate = kafkaTemplate;
+    public EmailProducer(
+            final KafkaTemplate<String, OtpRequest> producerTemplate) {
+        this.kafkaTemplate = producerTemplate;
     }
 
-    public void sendEmailId(OtpRequest otpRequest){
-        System.out.println("Sending to Kafka: " + otpRequest);
+    public void sendEmailId(final OtpRequest otpRequest) {
         kafkaTemplate.send("Email-topic", otpRequest);
     }
 }
-

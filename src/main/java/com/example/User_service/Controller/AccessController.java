@@ -1,73 +1,85 @@
 package com.example.User_service.Controller;
 
-import com.example.User_service.DTO.*;
-import com.example.User_service.Model.User;
-import com.example.User_service.Repositery.UserRepositery;
+import com.example.User_service.DTO.LoginRequest;
+import com.example.User_service.DTO.LoginResponse;
+import com.example.User_service.DTO.SignupRequest;
+import com.example.User_service.DTO.SignupResponse;
+import com.example.User_service.DTO.UsernameResponse;
+import com.example.User_service.DTO.VendorLogin;
+import com.example.User_service.DTO.VendorLoginResponse;
+import com.example.User_service.DTO.VendorSignupRequest;
+import com.example.User_service.DTO.VendorSignupResponse;
 import com.example.User_service.Service.AuthService;
 import com.example.User_service.Service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.parameters.P;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-
 public class AccessController {
     @Autowired
-    AuthService authService;
-    @Autowired
-    UserService userService;
+    private AuthService authService;
 
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/auth/login")
-    public ResponseEntity<?> loginRequest(@RequestBody LoginRequest loginRequest, HttpServletResponse response){
-        LoginResponse loginResponse=authService.login(loginRequest);
-       authService.SetCookies(loginResponse,response );
-        System.out.println(loginResponse);
-       return ResponseEntity.ok(loginResponse);
+    public ResponseEntity<LoginResponse> loginRequest(
+            @RequestBody final LoginRequest loginRequest,
+            final HttpServletResponse response) {
+        final LoginResponse loginResponse = authService.login(loginRequest);
+        authService.setCookies(loginResponse, response);
+        return ResponseEntity.ok(loginResponse);
     }
 
     @PostMapping("/auth/vendor/login")
-    public ResponseEntity<?> vendorloginRequest(@RequestBody VendorLogin loginRequest, HttpServletResponse response){
-        VendorLoginResponse loginResponse=authService.vendorLoginResponse(loginRequest);
-        authService.SetCookiesforvendor(loginResponse,response );
-        System.out.println(loginResponse);
+    public ResponseEntity<VendorLoginResponse> vendorLoginRequest(
+            @RequestBody final VendorLogin loginRequest,
+            final HttpServletResponse response) {
+        final VendorLoginResponse loginResponse =
+                authService.vendorLoginResponse(loginRequest);
+        authService.setCookiesForVendor(loginResponse, response);
         return ResponseEntity.ok(loginResponse);
     }
-    @PostMapping("/auth/vendor/signup")
-    public ResponseEntity<?>VendorsignupRequest(@RequestBody VendorSignupRequest signupRequest) throws IllegalAccessException {
-        VendorSignupResponse signupResponse=authService.vendorSignup(signupRequest);
 
+    @PostMapping("/auth/vendor/signup")
+    public ResponseEntity<VendorSignupResponse> vendorSignupRequest(
+            @RequestBody final VendorSignupRequest signupRequest)
+            throws IllegalAccessException {
+        final VendorSignupResponse signupResponse =
+                authService.vendorSignup(signupRequest);
         return ResponseEntity.ok(signupResponse);
     }
-
-
-
 
     @PostMapping("/auth/signup")
-    public ResponseEntity<?>signupRequest(@RequestBody SignupRequest signupRequest) throws IllegalAccessException {
-        SignupResponse signupResponse=authService.signup(signupRequest);
-
+    public ResponseEntity<SignupResponse> signupRequest(
+            @RequestBody final SignupRequest signupRequest)
+            throws IllegalAccessException {
+        final SignupResponse signupResponse = authService.signup(signupRequest);
         return ResponseEntity.ok(signupResponse);
     }
-    @PostMapping  ("/auth/Logout")
-    public ResponseEntity<?>Logout(HttpServletResponse response){
-        authService.DeleteCookies(response);
+
+    @PostMapping("/auth/logout")
+    public ResponseEntity<String> logout(final HttpServletResponse response) {
+        authService.deleteCookies(response);
         return ResponseEntity.ok("Successfully Logout");
     }
+
     @GetMapping("/auth/profile")
-    public ResponseEntity<UsernameResponse> getProfile(HttpServletRequest request) {
-
-        String userId = request.getHeader("X-USER-ID");
-        String username = request.getHeader("X-USERNAME");
-
-
-        UsernameResponse user = userService. usernameResponse(username);
-
+    public ResponseEntity<UsernameResponse> getProfile(
+            final HttpServletRequest request) {
+        final String username = request.getHeader("X-USERNAME");
+        final UsernameResponse user = userService.usernameResponse(username);
         return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/hello")
+    public String hello() {
+        return "Hello Prometheus";
     }
 }

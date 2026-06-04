@@ -1,0 +1,71 @@
+version: "3.9"
+
+services:
+
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-User-db
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password --bind-address=0.0.0.0
+    environment:
+      MYSQL_ROOT_PASSWORD: "Pranav@2005"
+      MYSQL_DATABASE: User_db
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - User-net
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: user-service
+    restart: always
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+
+    environment:
+      # Application Name (CRITICAL FIX)
+      SPRING_APPLICATION_NAME: "USER-SERVICE"
+
+      JWT_SECRET_KEY: 'fewfbewufh@euofew$jdfwnf&&&*jnkjfnekjw#fbhjewbfhewfbhj98989@@'
+
+
+
+      # Database
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-db:3306/User_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC"
+      SPRING_DATASOURCE_USERNAME: "root"
+      SPRING_DATASOURCE_PASSWORD: "Pranav@2005"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: "org.hibernate.dialect.MySQL8Dialect"
+
+      # Kafka
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+
+      # Server
+      SERVER_PORT: "8088"
+      SERVER_ADDRESS: "0.0.0.0"
+
+    ports:
+      - "8088:8088"
+
+    networks:
+      - User-net
+      - app-net
+
+volumes:
+  mysql_data:
+
+networks:
+  User-net:
+  app-net:
+    external: true
