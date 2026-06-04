@@ -65,7 +65,9 @@ class AccessControllerTest {
         verify(authService).login(requestCaptor.capture());
         assertThat(requestCaptor.getValue().getUsername()).isEqualTo("alice");
         assertThat(requestCaptor.getValue().getPassword()).isEqualTo("secret");
-        verify(authService).SetCookies(any(LoginResponse.class), any(HttpServletResponse.class));
+        verify(authService).setCookies(
+                any(LoginResponse.class),
+                any(HttpServletResponse.class));
     }
 
     @Test
@@ -82,7 +84,9 @@ class AccessControllerTest {
                 .andExpect(jsonPath("$.id").value(7L));
 
         verify(authService).vendorLoginResponse(any(VendorLogin.class));
-        verify(authService).SetCookiesforvendor(any(VendorLoginResponse.class), any(HttpServletResponse.class));
+        verify(authService).setCookiesForVendor(
+                any(VendorLoginResponse.class),
+                any(HttpServletResponse.class));
     }
 
     @Test
@@ -114,11 +118,11 @@ class AccessControllerTest {
 
     @Test
     void logoutClearsCookieAndReturnsMessage() throws Exception {
-        mockMvc.perform(post("/auth/Logout"))
+        mockMvc.perform(post("/auth/logout"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Successfully Logout"));
 
-        verify(authService).DeleteCookies(any(HttpServletResponse.class));
+        verify(authService).deleteCookies(any(HttpServletResponse.class));
     }
 
     @Test

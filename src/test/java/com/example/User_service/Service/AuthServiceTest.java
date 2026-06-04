@@ -62,6 +62,9 @@ class AuthServiceTest {
     private VendorRepositery vendorRepositery;
 
     @Mock
+    private UserMetrics userMetrics;
+
+    @Mock
     private HttpServletResponse response;
 
     @InjectMocks
@@ -78,14 +81,14 @@ class AuthServiceTest {
                 .build();
 
         when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
-        when(authUtil.generateAccessTokenforuser(user)).thenReturn("jwt-token");
+        when(authUtil.generateAccessTokenForUser(user)).thenReturn("jwt-token");
 
         LoginResponse result = authService.login(request);
 
         assertThat(result.getJwt()).isEqualTo("jwt-token");
         assertThat(result.getId()).isEqualTo(10L);
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(authUtil).generateAccessTokenforuser(user);
+        verify(authUtil).generateAccessTokenForUser(user);
     }
 
     @Test
@@ -104,14 +107,14 @@ class AuthServiceTest {
     void vendorLoginAuthenticatesVendorAndReturnsJwt() {
         VendorLogin request = new VendorLogin("vendor-a", "secret");
         Vendor vendor = Vendor.builder()
-                .Id(21L)
+                .id(21L)
                 .vendorName("vendor-a")
                 .emailId("vendor@example.com")
                 .role(Role.ROLE_VENDOR)
                 .build();
 
         when(vendorRepositery.findByVendorName("vendor-a")).thenReturn(Optional.of(vendor));
-        when(authUtil.generateAccessTokenforvendor(vendor)).thenReturn("vendor-jwt");
+        when(authUtil.generateAccessTokenForVendor(vendor)).thenReturn("vendor-jwt");
 
         VendorLoginResponse result = authService.vendorLoginResponse(request);
 
@@ -185,7 +188,7 @@ class AuthServiceTest {
 
     @Test
     void setCookiesAddsJwtHeader() {
-        authService.SetCookies(new LoginResponse("jwt-token", 10L), response);
+        authService.setCookies(new LoginResponse("jwt-token", 10L), response);
 
         ArgumentCaptor<String> headerValue = ArgumentCaptor.forClass(String.class);
         verify(response).addHeader(eq(org.springframework.http.HttpHeaders.SET_COOKIE), headerValue.capture());
@@ -195,7 +198,9 @@ class AuthServiceTest {
 
     @Test
     void setVendorCookiesAddsJwtHeader() {
-        authService.SetCookiesforvendor(new VendorLoginResponse("vendor-jwt", 21L), response);
+        authService.setCookiesForVendor(
+                new VendorLoginResponse("vendor-jwt", 21L),
+                response);
 
         ArgumentCaptor<String> headerValue = ArgumentCaptor.forClass(String.class);
         verify(response).addHeader(eq(HttpHeaders.SET_COOKIE), headerValue.capture());
@@ -205,7 +210,7 @@ class AuthServiceTest {
 
     @Test
     void deleteCookiesAddsExpiredCookie() {
-        authService.DeleteCookies(response);
+        authService.deleteCookies(response);
 
         ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
         verify(response).addCookie(cookieCaptor.capture());
