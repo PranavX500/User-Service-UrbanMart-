@@ -65,6 +65,10 @@ jobs:
           docker push ${GAR_REGION}-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }}
           docker push ${GAR_REGION}-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:latest
 
+      - name: Apply Kubernetes Manifests
+        run: |
+          kubectl apply -f k8s/
+
       - name: Update Kubernetes Deployment
         run: |
           kubectl set image deployment/user-service \
