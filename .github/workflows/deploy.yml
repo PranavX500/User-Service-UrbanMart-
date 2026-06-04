@@ -32,11 +32,9 @@ jobs:
           java-version: 17
           cache: maven
 
-      - name: Run Checkstyle
-        run: mvn checkstyle:check
+      - name: Build, Test and Quality Checks
+        run: mvn clean verify
 
-      - name: Build, Test and Generate JaCoCo Report
-        run: mvn test
 
       - name: SonarQube Scan
         env:
