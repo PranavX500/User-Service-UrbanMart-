@@ -42,6 +42,7 @@ jobs:
         run: |
           mvn org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar \
           -Dsonar.token=$SONAR_TOKEN
+       
 
      
 
@@ -70,12 +71,22 @@ jobs:
             -t ${GAR_REGION}-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }} \
             -t ${GAR_REGION}-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:latest \
             .
-      - name: Install Trivy
+      -  name: Install Trivy
+         run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+
+          wget -qO- https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+
+          trivy --version
+
+      - name: Scan Docker Image
         run: |
-         sudo apt-get update
-         sudo apt-get install wget -y
-         wget -q https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.65.0_Linux-64bit.deb
-         sudo dpkg -i trivy_0.65.0_Linux-64bit.deb
+         trivy image \
+          --severity HIGH,CRITICAL \
+          --exit-code 0 \
+          ${GAR_REGION}-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }}
+          
 
       - name: Push Docker Image
         run: |
