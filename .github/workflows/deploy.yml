@@ -9,7 +9,6 @@ env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
   GKE_ZONE: ${{ secrets.GKE_ZONE }}
-
   IMAGE_NAME: user-service
   REPOSITORY: urban-mart-microservices-images
   GAR_REGION: asia-south1
@@ -74,7 +73,9 @@ jobs:
 
       - name: Verify Rollout
         run: |
-          kubectl rollout status deployment/user-service -n urbanmart --timeout=300s
+          kubectl rollout status deployment/user-service \
+            -n urbanmart \
+            --timeout=600s
 
       - name: Show Deployment
         run: |
@@ -87,3 +88,18 @@ jobs:
       - name: Show Services
         run: |
           kubectl get svc -n urbanmart
+
+      - name: Debug Deployment
+        if: failure()
+        run: |
+          kubectl describe deployment user-service -n urbanmart
+
+      - name: Debug Pods
+        if: failure()
+        run: |
+          kubectl describe pods -n urbanmart
+
+      - name: Debug Events
+        if: failure()
+        run: |
+          kubectl get events -n urbanmart --sort-by=.metadata.creationTimestamp
