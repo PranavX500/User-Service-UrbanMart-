@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VendorLogin {
-    private String  vendorName;
+    private String vendorName;
     private String password;
 }
