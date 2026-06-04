@@ -72,13 +72,18 @@ jobs:
             -t ${GAR_REGION}-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:latest \
             .
 
-      - name: Run Trivy Security Scan
-        uses: aquasecurity/trivy-action@v0.33.1
-        with:
-          image-ref: ${GAR_REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}
-          format: table
-          exit-code: 0
-          severity: CRITICAL,HIGH   
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.65.0_Linux-64bit.deb
+          sudo dpkg -i trivy_0.65.0_Linux-64bit.deb
+
+      - name: Scan Docker Image
+        run: |
+          trivy image \
+            --severity HIGH,CRITICAL \
+            --exit-code 0 \
+            ${GAR_REGION}-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }}
 
       - name: Push Docker Image
         run: |
