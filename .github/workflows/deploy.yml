@@ -72,6 +72,14 @@ jobs:
             -t ${GAR_REGION}-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:latest \
             .
 
+      - name: Run Trivy Security Scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${GAR_REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}
+          format: table
+          exit-code: 0
+          severity: CRITICAL,HIGH   
+
       - name: Push Docker Image
         run: |
           docker push ${GAR_REGION}-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }}
