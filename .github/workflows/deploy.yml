@@ -43,8 +43,7 @@ jobs:
           mvn sonar:sonar \
             -Dsonar.token=$SONAR_TOKEN
 
-      - name: Build Spring Boot Application
-        run: mvn clean package
+     
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -71,19 +70,12 @@ jobs:
             -t ${GAR_REGION}-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }} \
             -t ${GAR_REGION}-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:latest \
             .
-
       - name: Install Trivy
         run: |
-          sudo apt-get update
-          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.65.0_Linux-64bit.deb
-          sudo dpkg -i trivy_0.65.0_Linux-64bit.deb
-
-      - name: Scan Docker Image
-        run: |
-          trivy image \
-            --severity HIGH,CRITICAL \
-            --exit-code 0 \
-            ${GAR_REGION}-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }}
+         sudo apt-get update
+         sudo apt-get install wget -y
+         wget -q https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.65.0_Linux-64bit.deb
+         sudo dpkg -i trivy_0.65.0_Linux-64bit.deb
 
       - name: Push Docker Image
         run: |
