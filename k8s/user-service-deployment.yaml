@@ -7,6 +7,12 @@ metadata:
 spec:
   replicas: 1
 
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+
   selector:
     matchLabels:
       app: user-service
@@ -52,7 +58,7 @@ spec:
 
           resources:
             requests:
-              memory: "256Mi"
+              memory: "250Mi"
               cpu: "100m"
 
             limits:
