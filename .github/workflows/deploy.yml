@@ -30,9 +30,23 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+          cache: maven
+
+      - name: Run Checkstyle
+        run: mvn checkstyle:check
+
+      - name: Run Unit Tests
+        run: mvn test
+
+      - name: SonarQube Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          mvn sonar:sonar \
+            -Dsonar.token=$SONAR_TOKEN
 
       - name: Build Spring Boot Application
-        run: mvn clean package -DskipTests
+        run: mvn clean package
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
